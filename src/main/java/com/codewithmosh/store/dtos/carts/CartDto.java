@@ -6,14 +6,13 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @AllArgsConstructor
 @Getter
 public class CartDto {
     private UUID id;
-    private Set<CartItemDto> items;
+    private List<CartItemDto> items = new ArrayList<>();
     private BigDecimal totalPrice;
     private LocalDateTime createdAt;
 }

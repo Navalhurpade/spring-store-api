@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -29,7 +28,7 @@ public class CartController {
 
     @PostMapping
     public ResponseEntity<CartDto> createCart(UriComponentsBuilder uriComponentsBuilder) {
-        var newCart = Cart.builder().createdAt(LocalDateTime.now()).build();
+        var newCart = new Cart();
 
         cartRepository.save(newCart);
         var uri = uriComponentsBuilder.path("/carts/{cartId}").buildAndExpand(newCart.getId()).toUri();
@@ -46,10 +45,11 @@ public class CartController {
 
     @DeleteMapping("/{cartId}")
     public ResponseEntity<?> deleteCart(@PathVariable UUID cartId) {
-        var found = cartRepository.findById(cartId).orElse(null);
-        if (found == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cart not found");
+        var cart = cartRepository.findById(cartId).orElse(null);
+        if (cart == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cart not cart");
 
-        cartRepository.delete(found);
+        cart.clearCart();
+        cartRepository.save(cart);
         return ResponseEntity.noContent().build();
     }
 

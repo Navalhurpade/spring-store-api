@@ -6,9 +6,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @AllArgsConstructor
 @Getter
@@ -24,7 +22,7 @@ public class Cart {
     private UUID id;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.MERGE, orphanRemoval = true)
-    private Set<CartItem> items = new HashSet<>();
+    private List<CartItem> items = new ArrayList<>();
 
     @JsonManagedReference
     @Column(name = "created_at", nullable = false)
@@ -68,4 +66,8 @@ public class Cart {
             cartItemFound.setCart(null);
         }
     };
+
+    public void clearCart () {
+        this.items.clear();
+    }
 }
