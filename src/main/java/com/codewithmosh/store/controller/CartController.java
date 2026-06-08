@@ -8,6 +8,7 @@ import com.codewithmosh.store.mappers.CartMapper;
 import com.codewithmosh.store.repositories.CartItemRepository;
 import com.codewithmosh.store.repositories.CartRepository;
 import com.codewithmosh.store.repositories.ProductRepository;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,7 +66,7 @@ public class CartController {
     }
 
     @PostMapping("/{cartId}/items")
-    public ResponseEntity<?> addItemsToCart(@PathVariable UUID cartId, @RequestBody CartItemRequest request, UriComponentsBuilder uriComponentsBuilder) {
+    public ResponseEntity<?> addItemsToCart(@PathVariable UUID cartId, @RequestBody @Valid CartItemRequest request) {
         var cart = cartRepository.findById(cartId).orElse(null);
         if (cart == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cart not found");
 

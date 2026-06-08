@@ -6,6 +6,7 @@ import com.codewithmosh.store.entities.Product;
 import com.codewithmosh.store.mappers.ProductMapper;
 import com.codewithmosh.store.repositories.CategoryRepository;
 import com.codewithmosh.store.repositories.ProductRepository;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -56,7 +57,7 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<ProductDto> createProduct(
-            @RequestBody CreateProductRequest request,
+            @RequestBody @Valid CreateProductRequest request,
             UriComponentsBuilder uriBuilder
     ) {
         var category = categoryRepository.findById(request.getCategoryId()).orElse(null);

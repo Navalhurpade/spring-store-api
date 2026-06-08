@@ -5,12 +5,16 @@ import com.codewithmosh.store.dtos.users.UpdateUserRequest;
 import com.codewithmosh.store.dtos.users.UserDto;
 import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -21,7 +25,7 @@ public class UserController {
     private UserMapper userMapper;
 
     @GetMapping
-    public Iterable<UserDto> getUsers(@RequestParam(value = "", name = "sort", required = false) String sort) {
+    public Iterable<UserDto> getUsers(@RequestParam(name = "sort", required = false) String sort) {
 
         if (!Set.of("name", "email").contains(sort)) {
             sort = "name";
@@ -46,7 +50,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UserDto> createUser(
-            @RequestBody RegisterUserRequest request,
+            @RequestBody @Valid RegisterUserRequest request,
             UriComponentsBuilder uriBuilder
     ) {
         var found = userRepository.findByEmail(request.getEmail()).orElse(null);
@@ -65,7 +69,7 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(
             @PathVariable Long id,
-            @RequestBody UpdateUserRequest request
+            @RequestBody @Valid UpdateUserRequest request
     ) {
         var found = userRepository.findById(id).orElse(null);
 
@@ -89,5 +93,15 @@ public class UserController {
 
         userRepository.delete(found);
         return ResponseEntity.noContent().build();
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationError(
+            MethodArgumentNotValidException exception) {
+        var errors = new HashMap<String, String >();
+
+        exception.getBindingResult().getFieldErrors().forEach( e -> errors.put(e.getField(), e.getDefaultMessage()));
+
+        return ResponseEntity.badRequest().body(errors);
     }
 }
