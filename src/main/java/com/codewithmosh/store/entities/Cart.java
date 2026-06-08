@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,7 +23,7 @@ public class Cart {
     @Column(name = "id")
     private UUID id;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.MERGE, orphanRemoval = true)
     private Set<CartItem> items = new HashSet<>();
 
     @JsonManagedReference
@@ -34,4 +35,37 @@ public class Cart {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    public BigDecimal getTotalPrice() {
+        return items.stream()
+                .map(CartItem::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public CartItem getItem(Long productId) {
+       return items.stream().filter(i -> i.getProduct().getId().equals(productId)).findFirst().orElse(null);
+    }
+
+    public CartItem addItem(Product product) {
+        CartItem cartItem = items.stream().filter(i -> i.getProduct().getId().equals(product.getId())).findFirst().orElse(null);
+
+        if (cartItem != null) {
+            cartItem.setQuantity(cartItem.getQuantity() + 1);
+        } else {
+            cartItem = new CartItem();
+            cartItem.setProduct(product);
+            cartItem.setCart(this);
+            cartItem.setQuantity(1);
+            items.add(cartItem);
+        }
+        return cartItem;
+    }
+
+    public void removeItem (Long productId) {
+        var cartItemFound = this.getItem(productId);
+        if (cartItemFound != null) {
+            this.getItems().remove(cartItemFound);
+            cartItemFound.setCart(null);
+        }
+    };
 }

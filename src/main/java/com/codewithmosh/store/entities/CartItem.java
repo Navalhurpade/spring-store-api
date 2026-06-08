@@ -6,6 +6,8 @@ import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.math.BigDecimal;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -31,4 +33,9 @@ public class CartItem {
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;
+
+    public BigDecimal getTotalPrice() {
+        if (product == null || quantity == null) return BigDecimal.ZERO;
+        return product.getPrice().multiply(BigDecimal.valueOf(quantity));
+    }
 }

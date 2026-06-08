@@ -1,19 +1,13 @@
 package com.codewithmosh.store.dtos.carts;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 
 import java.math.BigDecimal;
 
-
-@AllArgsConstructor
-@Getter
+@Data
 public class CartItemDto {
     private Long id;
-    private Long productId;
-    private String productName;
-    private String productDescription;
-    private BigDecimal productPrice;
-    private String productCategory;
+    private CartProductDto product;
     private Integer quantity;
-};
+    private BigDecimal totalPrice;
+}
