@@ -8,10 +8,12 @@ import com.codewithmosh.store.entities.CartItem;
 import com.codewithmosh.store.entities.Product;
 import org.mapstruct.Mapper;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface CartMapper {
     CartDto toDto(Cart cart);
 
     CartItemDto toCartItemDto(CartItem item);
     CartProductDto toCartProductDto(Product item);
-}
+    List<CartItemDto> toItemsDto(List<CartItem> items);}
