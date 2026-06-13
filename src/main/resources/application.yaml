@@ -8,3 +8,5 @@ spring:
     password: root
   jpa:
     show-sql: true
+  jwt:
+    secret: ${SECRET}
