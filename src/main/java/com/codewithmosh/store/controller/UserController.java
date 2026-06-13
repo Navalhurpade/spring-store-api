@@ -9,18 +9,17 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
 @AllArgsConstructor
 public class UserController {
+    private final PasswordEncoder passwordEncoder;
     private UserRepository userRepository;
     private UserMapper userMapper;
 
@@ -58,8 +57,10 @@ public class UserController {
         if (found != null) {
             return ResponseEntity.notFound().build();
         }
+        var user = userMapper.toEntity(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        var data = userRepository.save(userMapper.toEntity(request));
+        var data = userRepository.save(user);
         var userDto = userMapper.toDto(data);
         var uri = uriBuilder.path("/users/{id}").buildAndExpand(userDto.getId()).toUri();
 
