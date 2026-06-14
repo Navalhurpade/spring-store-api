@@ -1,11 +1,15 @@
 package com.codewithmosh.store.config;
 
+import com.codewithmosh.store.entities.Role;
 import com.codewithmosh.store.filters.AuthFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -52,18 +56,21 @@ public class SecurityConfiguration {
                 .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // set auth type to jwt
                 .csrf(AbstractHttpConfigurer::disable)  // disables csrf protection
                 .authorizeHttpRequests(c -> c
+                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        .requestMatchers("/admin/**").hasRole(Role.ADMIN.name())
                         .requestMatchers("/carts/**").permitAll()
                         .anyRequest().authenticated()
 
                 )
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(c ->
-                        c.authenticationEntryPoint(
-                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
-                        ));
+                .exceptionHandling(c -> {
+                    c.authenticationEntryPoint(
+                            new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+                    c.accessDeniedHandler((HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) ->
+                            response.setStatus(HttpStatus.FORBIDDEN.value()));
+                });
         return http.build();
     }
 }

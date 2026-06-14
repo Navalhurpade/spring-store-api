@@ -2,8 +2,6 @@ package com.codewithmosh.store.services;
 
 import com.codewithmosh.store.config.JwtConfig;
 import com.codewithmosh.store.entities.User;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,43 +13,44 @@ import java.util.Date;
 public class JwtService {
     private final JwtConfig jwtConfig;
 
-    public String generateAccessToken(User user) {
-        return getToken(user, jwtConfig.getAccessTokenExpiration());
-    }
-
-    public String generateRefreshToken(User user) {
-        return getToken(user, jwtConfig.getRefreshTokenExpiration());
-    }
-
-    private String getToken(User user, int tokenExpiration) {
-        return Jwts.builder()
+    private Jwt generateToken(User user, int tokenExpiration) {
+        var claims = Jwts.claims()
+                .add("name", user.getName())
+                .add("email", user.getEmail())
+                .add("role", user.getRole())
                 .subject(user.getId().toString())
-                .claim("name", user.getName())
-                .claim("email", user.getEmail())
                 .issuedAt(new Date())
-                .expiration(new Date((System.currentTimeMillis() + 1000 * tokenExpiration)))
-                .signWith(jwtConfig.getSecretKey())
-                .compact();
+                .expiration(new Date((System.currentTimeMillis() + 1000L * tokenExpiration)))
+                .build();
+
+        return new Jwt(jwtConfig.getSecretKey(), claims);
     }
 
-    public boolean validateToken(String token) {
-        try {
-            var claims = getClaims(token);
-            return claims.getExpiration().after(new Date());
-        } catch (JwtException e) {
-            return false;
-        }
-    }
-
-    public Long getUserIdFromToken(String token) {
-        return Long.valueOf(getClaims(token).getSubject());
-    }
-
-    private Claims getClaims(String token) {
-        return Jwts.parser()
+    public Jwt parse(String token) {
+        var claims = Jwts.parser()
                 .verifyWith(jwtConfig.getSecretKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+
+        return new Jwt(jwtConfig.getSecretKey(), claims);
+    }
+
+    public Jwt generateAccessToken(User user) {
+        var jwt = generateToken(user, jwtConfig.getAccessTokenExpiration());
+        var token = Jwts.builder()
+                .claims(jwt.getClaims())
+                .signWith(jwtConfig.getSecretKey())
+                .compact();
+        return parse(token);
+    }
+
+    public Jwt generateRefreshToken(User user) {
+        var jwt = generateToken(user, jwtConfig.getRefreshTokenExpiration());
+        var token = Jwts.builder()
+                .claims(jwt.getClaims())
+                .signWith(jwtConfig.getSecretKey())
+                .compact();
+        return parse(token);
     }
 }

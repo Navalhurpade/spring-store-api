@@ -40,8 +40,8 @@ public class AuthController {
                         request.getPassword()
                 )
         );
-        var accessToken = jwtService.generateAccessToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
+        var accessToken = jwtService.generateAccessToken(user).toString();
+        var refreshToken = jwtService.generateRefreshToken(user).toString();
 
         var cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);
@@ -57,13 +57,14 @@ public class AuthController {
     public ResponseEntity<JwtResponse> refresh(
             @CookieValue(value = "refreshToken") String refreshToken
     ) {
-        if (!jwtService.validateToken(refreshToken)) {
+        var jwt = jwtService.parse(refreshToken);
+        if (!jwt.isValid()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        var userId = jwtService.getUserIdFromToken(refreshToken);
+        var userId = jwtService.parse(refreshToken).getUserId();
         var user = userRepository.findById(userId).orElseThrow();
-        var accessToken = jwtService.generateAccessToken(user);
+        var accessToken = jwtService.generateAccessToken(user).toString();
 
         return ResponseEntity.ok(new JwtResponse(accessToken));
     }
@@ -71,9 +72,9 @@ public class AuthController {
     @GetMapping("/me")
     public UserDto getUser() {
         var ctx = SecurityContextHolder.getContext().getAuthentication();
-        var userId = (String) ctx.getPrincipal();
+        var userId = (Long) ctx.getPrincipal();
 
-        var user = userRepository.findById(Long.valueOf(userId)).orElse(null);
+        var user = userRepository.findById(userId).orElse(null);
 
         return userMapper.toDto(user);
     }

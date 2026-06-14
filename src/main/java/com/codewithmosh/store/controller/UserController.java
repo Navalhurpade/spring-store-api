@@ -3,6 +3,7 @@ package com.codewithmosh.store.controller;
 import com.codewithmosh.store.dtos.users.RegisterUserRequest;
 import com.codewithmosh.store.dtos.users.UpdateUserRequest;
 import com.codewithmosh.store.dtos.users.UserDto;
+import com.codewithmosh.store.entities.Role;
 import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
 import jakarta.validation.Valid;
@@ -59,6 +60,7 @@ public class UserController {
         }
         var user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(Role.USER);
 
         var data = userRepository.save(user);
         var userDto = userMapper.toDto(data);
