@@ -57,13 +57,12 @@ public class AuthController {
     public ResponseEntity<JwtResponse> refresh(
             @CookieValue(value = "refreshToken") String refreshToken
     ) {
-        var jwt = jwtService.parse(refreshToken);
-        if (!jwt.isValid()) {
+        var refreshJwt = jwtService.parse(refreshToken);
+        if (refreshJwt == null || refreshJwt.isExpired()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        var userId = jwtService.parse(refreshToken).getUserId();
-        var user = userRepository.findById(userId).orElseThrow();
+        var user = userRepository.findById(refreshJwt.getUserId()).orElseThrow();
         var accessToken = jwtService.generateAccessToken(user).toString();
 
         return ResponseEntity.ok(new JwtResponse(accessToken));

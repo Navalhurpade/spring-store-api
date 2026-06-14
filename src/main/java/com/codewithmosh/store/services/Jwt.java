@@ -15,8 +15,8 @@ public class Jwt {
     private final SecretKey key;
     private final Claims claims;
     
-    public boolean isValid() {
-        return claims.getExpiration().after(new Date());
+    public boolean isExpired() {
+        return claims.getExpiration().before(new Date());
     }
 
     public Long getUserId() {
