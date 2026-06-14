@@ -10,3 +10,11 @@ spring:
     show-sql: true
   jwt:
     secret: ${SECRET}
+    accessTokenExpiration: 300      # 5m
+    refreshTokenExpiration: 648000  # 7d
+server:
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-type: PKCS12
+    key-alias: springboot
+    key-store-password: password
