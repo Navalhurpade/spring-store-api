@@ -18,3 +18,5 @@ server:
     key-store-type: PKCS12
     key-alias: springboot
     key-store-password: password
+  error:
+    include-message: always

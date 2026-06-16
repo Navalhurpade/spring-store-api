@@ -2,6 +2,7 @@ package com.codewithmosh.store.controller;
 
 import com.codewithmosh.store.dtos.orders.OrderDto;
 import com.codewithmosh.store.dtos.orders.PlaceOrderRequest;
+import com.codewithmosh.store.dtos.orders.UpdateOrderRequest;
 import com.codewithmosh.store.mappers.OrderMapper;
 import com.codewithmosh.store.services.OrderService;
 import com.codewithmosh.store.services.UserService;
@@ -30,5 +31,17 @@ public class OrderController {
     public ResponseEntity<List<OrderDto>> getOrderHistory() {
         var order = orderService.getOrders();
         return ResponseEntity.status(HttpStatus.CREATED).body(orderMapper.toOrdersDto(order));
+    }
+
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderDto> getOrderById(@PathVariable Long orderId) {
+        var order = orderService.getOrderById(orderId);
+        return ResponseEntity.ok(orderMapper.toDto(order));
+    }
+
+    @PatchMapping("/{orderId}")
+    public ResponseEntity<OrderDto> updateOrder(@PathVariable Long orderId, @RequestBody UpdateOrderRequest request) {
+        var order = orderService.updateOrder(orderId, request);
+        return ResponseEntity.ok(orderMapper.toDto(order));
     }
 }
