@@ -6,6 +6,7 @@ import com.codewithmosh.store.dtos.users.UserDto;
 import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
 import com.codewithmosh.store.services.JwtService;
+import com.codewithmosh.store.services.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,6 +25,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
@@ -70,10 +71,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public UserDto getUser() {
-        var ctx = SecurityContextHolder.getContext().getAuthentication();
-        var userId = (Long) ctx.getPrincipal();
-
-        var user = userRepository.findById(userId).orElse(null);
+        var user = userService.getCurentUser();
 
         return userMapper.toDto(user);
     }
