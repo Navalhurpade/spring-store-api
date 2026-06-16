@@ -19,6 +19,7 @@ public class Order {
     @Column(name = "id")
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private OrderStatus status = OrderStatus.PENDING;
 

@@ -7,6 +7,8 @@ import com.codewithmosh.store.entities.OrderItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring",
         uses = ProductMapper.class)
 public interface OrderMapper {
@@ -15,4 +17,6 @@ public interface OrderMapper {
 
     @Mapping(source = "product.id", target = "itemId")
     OrderItemDto toOrderItemDto(OrderItem order);
+
+    List<OrderDto> toOrdersDto(List<Order> order);
 }
