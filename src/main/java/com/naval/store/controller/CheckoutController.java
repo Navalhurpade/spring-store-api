@@ -14,10 +14,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @AllArgsConstructor
@@ -48,4 +45,14 @@ public class CheckoutController {
             return responseUtils.error(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, ex.getLocalizedMessage());
         }
     }
+
+    @PostMapping("/webhook")
+    public HttpEntity<?> handleWebhook(
+            @RequestBody String payload,
+            @RequestHeader("X-Razorpay-Signature") String signature
+    ) {
+        razorpayPaymentGateway.handleWebhook(payload, signature);
+        return responseUtils.ok(null);
+    }
+
 }

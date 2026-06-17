@@ -5,6 +5,7 @@ import com.naval.store.exceptions.auth.ResourceForbiddenException;
 import com.naval.store.exceptions.auth.UserNotFoundException;
 import com.naval.store.exceptions.cart.CartNotFoundException;
 import com.naval.store.exceptions.cart.EmptyCartException;
+import com.naval.store.exceptions.paymentGateway.InvalidWebhookSignatureException;
 import com.naval.store.exceptions.paymentGateway.PaymentGatewayException;
 import com.naval.store.exceptions.product.CategoryNotFoundException;
 import com.naval.store.exceptions.product.ProductNotFoundException;
@@ -83,5 +84,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PaymentGatewayException.class)
     public ResponseEntity<ApiResponse<Void>> handleUnreadableError(PaymentGatewayException ex) {
         return responseUtils.error("Payment gateway failed with error", HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidWebhookSignatureException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnreadableError(InvalidWebhookSignatureException ex) {
+        return responseUtils.error("Invalid payment signature", HttpStatus.BAD_GATEWAY, ex.getMessage());
     }
 }

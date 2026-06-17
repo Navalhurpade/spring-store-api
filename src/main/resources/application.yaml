@@ -24,3 +24,4 @@ server:
 razorpay:
   api-key: ${RAZORPAY_API_KEY}
   api-secret: ${RAZORPAY_API_SECRET}
+  webhook-secret: ${RAZORPAY_WEBHOOK_SECRET}
