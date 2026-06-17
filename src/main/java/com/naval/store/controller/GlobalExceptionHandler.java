@@ -5,6 +5,7 @@ import com.naval.store.exceptions.auth.ResourceForbiddenException;
 import com.naval.store.exceptions.auth.UserNotFoundException;
 import com.naval.store.exceptions.cart.CartNotFoundException;
 import com.naval.store.exceptions.cart.EmptyCartException;
+import com.naval.store.exceptions.product.CategoryNotFoundException;
 import com.naval.store.exceptions.product.ProductNotFoundException;
 import com.naval.store.utils.ResponseUtils;
 import lombok.AllArgsConstructor;
@@ -43,6 +44,12 @@ public class GlobalExceptionHandler {
         return responseUtils.badRequest(ex.getMessage());
     }
 
+    //Order Exceptions
+    @ExceptionHandler(com.naval.store.exceptions.order.OrderNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleOrderNotFound(com.naval.store.exceptions.order.OrderNotFoundException ex) {
+        return responseUtils.error(ex.getMessage(), HttpStatus.NOT_FOUND, null);
+    }
+
     //User Exceptions
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleUserNotFound(UserNotFoundException ex) {
@@ -53,6 +60,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ProductNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleProductNotFound(ProductNotFoundException ex) {
         return responseUtils.error(ex.getMessage(), HttpStatus.NOT_FOUND, null);
+    }
+
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCategoryNotFound(CategoryNotFoundException ex) {
+        return responseUtils.badRequest(ex.getMessage());
     }
 
     //Security Exceptions
