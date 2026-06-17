@@ -6,5 +6,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 @StandardException
-public class EmptyCartException extends RuntimeException{
+public class EmptyCartException extends RuntimeException {
+    public EmptyCartException() {
+        super("Cart empty.");
+    }
 }

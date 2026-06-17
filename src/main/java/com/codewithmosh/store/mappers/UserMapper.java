@@ -8,6 +8,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())", dateFormat = "MMM DD YYYY")
@@ -16,4 +18,6 @@ public interface UserMapper {
     User toEntity(RegisterUserRequest request);
 
     void toRequestUpdate(UpdateUserRequest request, @MappingTarget User user);
+
+    List<UserDto> toUsersDto(List<User> users);
 }

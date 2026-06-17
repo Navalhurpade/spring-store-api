@@ -8,6 +8,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -40,4 +41,17 @@ public class Order {
     @JsonManagedReference
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    public static Order createFromCart(Cart cart, User customer) {
+        var order = new Order();
+        var orderItems = cart.getItems().stream().map(i -> {
+            var id = new OrderItemId(order.getId(), i.getProduct().getId());
+            return new OrderItem(id, order, i.getProduct(), i.getQuantity(), i.getTotalPrice(), i.getProduct().getPrice());
+        }).collect(Collectors.toSet());
+
+        order.setCustomer(customer);
+        order.setTotalPrice(cart.getTotalPrice());
+        order.setItems(orderItems);
+        return order;
+    }
 }

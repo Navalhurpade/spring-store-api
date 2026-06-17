@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @StandardException
 public class CartNotFoundException extends RuntimeException {
     public CartNotFoundException(){
-        super("Cart nopt found");
+        super("Cart not found.");
     }
 }

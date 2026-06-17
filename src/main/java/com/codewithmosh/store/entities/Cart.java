@@ -6,7 +6,9 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @AllArgsConstructor
 @Getter
@@ -41,10 +43,10 @@ public class Cart {
     }
 
     public CartItem getItem(Long productId) {
-       return items.stream().filter(i -> i.getProduct().getId().equals(productId)).findFirst().orElse(null);
+        return items.stream().filter(i -> i.getProduct().getId().equals(productId)).findFirst().orElse(null);
     }
 
-    public CartItem addItem(Product product) {
+    public void addItem(Product product) {
         CartItem cartItem = items.stream().filter(i -> i.getProduct().getId().equals(product.getId())).findFirst().orElse(null);
 
         if (cartItem != null) {
@@ -56,18 +58,21 @@ public class Cart {
             cartItem.setQuantity(1);
             items.add(cartItem);
         }
-        return cartItem;
     }
 
-    public void removeItem (Long productId) {
+    public void removeItem(Long productId) {
         var cartItemFound = this.getItem(productId);
         if (cartItemFound != null) {
             this.getItems().remove(cartItemFound);
             cartItemFound.setCart(null);
         }
-    };
+    }
 
-    public void clearCart () {
+    public void clearCart() {
         this.items.clear();
+    }
+
+    public boolean isEmpty() {
+        return items.isEmpty();
     }
 }

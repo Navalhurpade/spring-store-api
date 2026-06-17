@@ -5,7 +5,6 @@ import com.codewithmosh.store.dtos.orders.PlaceOrderRequest;
 import com.codewithmosh.store.dtos.orders.UpdateOrderRequest;
 import com.codewithmosh.store.mappers.OrderMapper;
 import com.codewithmosh.store.services.OrderService;
-import com.codewithmosh.store.services.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +18,6 @@ import java.util.List;
 public class OrderController {
     private final OrderMapper orderMapper;
     private final OrderService orderService;
-    private final UserService userService;
 
     @PostMapping
     public ResponseEntity<OrderDto> placeOrder(@RequestBody PlaceOrderRequest request) {

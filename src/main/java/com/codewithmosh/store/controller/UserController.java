@@ -1,100 +1,65 @@
 package com.codewithmosh.store.controller;
 
+import com.codewithmosh.store.dtos.apiResponse.ApiResponse;
 import com.codewithmosh.store.dtos.users.RegisterUserRequest;
 import com.codewithmosh.store.dtos.users.UpdateUserRequest;
 import com.codewithmosh.store.dtos.users.UserDto;
-import com.codewithmosh.store.entities.Role;
 import com.codewithmosh.store.mappers.UserMapper;
-import com.codewithmosh.store.repositories.UserRepository;
+import com.codewithmosh.store.services.UserService;
+import com.codewithmosh.store.utils.ResponseUtils;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
 @AllArgsConstructor
 public class UserController {
-    private final PasswordEncoder passwordEncoder;
-    private UserRepository userRepository;
+    private final UserService userService;
+    private final ResponseUtils responseUtils;
     private UserMapper userMapper;
 
     @GetMapping
-    public Iterable<UserDto> getUsers(@RequestParam(name = "sort", required = false) String sort) {
+    public ResponseEntity<ApiResponse<List<UserDto>>> getUsers(@RequestParam(name = "sort", required = false, defaultValue = "name") String sort) {
+        var users = userService.getUsers(sort);
 
-        if (!Set.of("name", "email").contains(sort)) {
-            sort = "name";
-        }
-        return userRepository.findAll(Sort.by(sort))
-                .stream()
-                .map(userMapper::toDto)
-                .toList();
-
+        return responseUtils.ok(userMapper.toUsersDto(users));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
-        var data = userRepository.findById(id).orElse(null);
-
-        if (data == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(userMapper.toDto(data));
+    public ResponseEntity<ApiResponse<UserDto>> getUserById(@PathVariable Long id) {
+        var user = userService.getUserById(id);
+        return responseUtils.ok(userMapper.toDto(user));
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> createUser(
+    public ResponseEntity<ApiResponse<UserDto>> createUser(
             @RequestBody @Valid RegisterUserRequest request,
             UriComponentsBuilder uriBuilder
     ) {
-        var found = userRepository.findByEmail(request.getEmail()).orElse(null);
+        var user = userService.registerUser(request);
+        var uri = uriBuilder.path("/users/{id}").buildAndExpand(user.getId()).toUri();
 
-        if (found != null) {
-            return ResponseEntity.notFound().build();
-        }
-        var user = userMapper.toEntity(request);
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(Role.USER);
-
-        var data = userRepository.save(user);
-        var userDto = userMapper.toDto(data);
-        var uri = uriBuilder.path("/users/{id}").buildAndExpand(userDto.getId()).toUri();
-
-        return ResponseEntity.created(uri).body(userDto);
+        return responseUtils.ok(userMapper.toDto(user), HttpStatus.CREATED, uri);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(
+    public ResponseEntity<ApiResponse<UserDto>> updateUser(
             @PathVariable Long id,
             @RequestBody @Valid UpdateUserRequest request
     ) {
-        var found = userRepository.findById(id).orElse(null);
-
-        if (found == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        userMapper.toRequestUpdate(request, found);
-
-        var data = userRepository.save(found);
-        return ResponseEntity.ok(userMapper.toDto(data));
+        var user = userService.updateUser(id, request);
+        return responseUtils.ok(userMapper.toDto(user));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        var found = userRepository.findById(id).orElse(null);
-
-        if (found == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        userRepository.delete(found);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return responseUtils.ok(null, HttpStatus.NO_CONTENT, null);
     }
 }

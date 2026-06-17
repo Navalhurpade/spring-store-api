@@ -2,8 +2,6 @@ package com.codewithmosh.store.services;
 
 import com.codewithmosh.store.dtos.orders.UpdateOrderRequest;
 import com.codewithmosh.store.entities.Order;
-import com.codewithmosh.store.entities.OrderItem;
-import com.codewithmosh.store.entities.OrderItemId;
 import com.codewithmosh.store.exceptions.CartNotFoundException;
 import com.codewithmosh.store.exceptions.EmptyCartException;
 import com.codewithmosh.store.exceptions.OrderNotFoundException;
@@ -17,32 +15,21 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @AllArgsConstructor
 @Service
 public class OrderService {
     private final CartRepository cartRepository;
-    private final UserService userService;
+    private final AuthUserService userService;
     private final OrderRepository orderRepository;
 
     public Order placeOrder(UUID cartId) {
         var cart = cartRepository.findById(cartId).orElseThrow(CartNotFoundException::new);
 
-        if (cart.getItems().isEmpty()) {
-            throw new EmptyCartException();
-        }
+        if (cart.isEmpty()) throw new EmptyCartException();
 
-        var order = new Order();
-        var orderItems = cart.getItems().stream().map(i -> {
-            var id = new OrderItemId(order.getId(), i.getProduct().getId());
-            return new OrderItem(id, order, i.getProduct(), i.getQuantity(), i.getTotalPrice(), i.getProduct().getPrice());
-        }).collect(Collectors.toSet());
-
-        order.setCustomer(userService.getCurentUser());
-        order.setTotalPrice(cart.getTotalPrice());
-        order.setItems(orderItems);
+        var order = Order.createFromCart(cart, userService.getCurentUser());
         orderRepository.save(order);
         return order;
     }

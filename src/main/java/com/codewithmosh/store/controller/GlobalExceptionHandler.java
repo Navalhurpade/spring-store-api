@@ -1,36 +1,57 @@
 package com.codewithmosh.store.controller;
 
+import com.codewithmosh.store.dtos.apiResponse.ApiResponse;
 import com.codewithmosh.store.exceptions.CartNotFoundException;
 import com.codewithmosh.store.exceptions.EmptyCartException;
+import com.codewithmosh.store.exceptions.ResourceForbiddenException;
+import com.codewithmosh.store.exceptions.UserNotFoundException;
+import com.codewithmosh.store.utils.ResponseUtils;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
-import java.util.Map;
 
+@AllArgsConstructor
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationError(
-            MethodArgumentNotValidException exception) {
-        var errors = new HashMap<String, String>();
+    private final ResponseUtils responseUtils;
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleValidationError(MethodArgumentNotValidException exception) {
+        var errors = new HashMap<String, String>();
         exception.getBindingResult().getFieldErrors().forEach(e -> errors.put(e.getField(), e.getDefaultMessage()));
 
-        return ResponseEntity.badRequest().body(errors);
+        return responseUtils.error("Error in one or more fields", HttpStatus.BAD_REQUEST, errors);
     }
 
-
     @ExceptionHandler(CartNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleCartNotFound() {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Cart not found"));
+    public ResponseEntity<ApiResponse<Void>> handleCartNotFound(CartNotFoundException ex) {
+        return responseUtils.error(ex.getMessage(), HttpStatus.NOT_FOUND, null);
     }
 
     @ExceptionHandler(EmptyCartException.class)
-    public ResponseEntity<Map<String, String>> handleEmptyCart() {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Your cart is empty"));
+    public ResponseEntity<ApiResponse<Void>> handleEmptyCart(EmptyCartException ex) {
+        return responseUtils.badRequest(ex.getMessage());
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUserNotFound(UserNotFoundException ex) {
+        return responseUtils.error(ex.getMessage(), HttpStatus.NOT_FOUND, null);
+    }
+
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<ApiResponse<Void>> handleUnreadableError() {
+        return responseUtils.badRequest("Invalid request body");
+    }
+
+    @ExceptionHandler(ResourceForbiddenException.class)
+    public ResponseEntity<ApiResponse<Void>> handleForbiddenException(ResourceForbiddenException ex) {
+        return responseUtils.error(ex.getMessage(), HttpStatus.FORBIDDEN, null);
     }
 }

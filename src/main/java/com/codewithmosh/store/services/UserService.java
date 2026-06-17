@@ -1,35 +1,63 @@
 package com.codewithmosh.store.services;
 
+import com.codewithmosh.store.dtos.users.RegisterUserRequest;
+import com.codewithmosh.store.dtos.users.UpdateUserRequest;
+import com.codewithmosh.store.entities.Role;
+import com.codewithmosh.store.entities.User;
+import com.codewithmosh.store.exceptions.UserAlreadyExistException;
+import com.codewithmosh.store.exceptions.UserNotFoundException;
+import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @Service
-public class UserService implements UserDetailsService {
+public class UserService {
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
-    @Override
-    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        var user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return new User(user.getEmail(), user.getPassword(), Collections.emptyList());
+    public List<User> getUsers(String sort) {
+        if (!Set.of("name", "email").contains(sort)) {
+            sort = "name";
+        }
+        return userRepository.findAll(Sort.by(sort));
     }
 
-    /**
-     * Should be only used in authenticated methods
-     * @return com.codewithmosh.store.entities.User
-     */
-    public com.codewithmosh.store.entities.User getCurentUser() {
-        var ctx = SecurityContextHolder.getContext().getAuthentication();
-        var userId = (Long) ctx.getPrincipal();
-
-        return userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
     }
+
+    public User registerUser(RegisterUserRequest request) {
+        var found = userRepository.findByEmail(request.getEmail()).orElse(null);
+        if(found != null) {
+            throw new UserAlreadyExistException();
+        }
+
+        var user = userMapper.toEntity(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(Role.USER);
+
+        return userRepository.save(user);
+    }
+
+    public User updateUser(Long userId, UpdateUserRequest request) {
+        var found = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        userMapper.toRequestUpdate(request, found);
+
+        return userRepository.save(found);
+    }
+
+    public void deleteUser(Long userId) {
+        var found = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+
+        userRepository.delete(found);
+    }
+
 }
