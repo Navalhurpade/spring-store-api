@@ -1,18 +1,12 @@
 package com.codewithmosh.store.services;
 
-import com.codewithmosh.store.dtos.carts.CartDto;
-import com.codewithmosh.store.dtos.carts.CartItemDto;
 import com.codewithmosh.store.entities.Cart;
-import com.codewithmosh.store.entities.Product;
+import com.codewithmosh.store.entities.CartItem;
 import com.codewithmosh.store.exceptions.CartNotFoundException;
-import com.codewithmosh.store.exceptions.InvalidProductIdException;
 import com.codewithmosh.store.exceptions.ProductNotFoundException;
-import com.codewithmosh.store.mappers.CartMapper;
 import com.codewithmosh.store.repositories.CartRepository;
 import com.codewithmosh.store.repositories.ProductRepository;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,81 +16,57 @@ import java.util.UUID;
 @Service
 public class CartService {
     private final CartRepository cartRepository;
-    private final CartMapper cartMapper;
     private ProductRepository productRepository;
 
-    public CartDto createCart() {
-        var cart = cartRepository.save(new Cart());
-        return cartMapper.toDto(cart);
+    public Cart createCart() {
+        return cartRepository.save(new Cart());
     }
 
-    public CartDto getCart(UUID cartId) {
-        var cart = validateAndGetCart(cartId);
-        return cartMapper.toDto(cart);
+    public Cart getCart(UUID cartId) {
+        return cartRepository.findById(cartId).orElseThrow(CartNotFoundException::new);
     }
 
-    public CartDto addProductToCart(UUID cartId, Long productId) {
-        var cart = validateAndGetCart(cartId);
-        var product = validateAndGetProduct(productId);
+    public Cart addProductToCart(UUID cartId, Long productId) {
+        var cart = cartRepository.findById(cartId).orElseThrow(CartNotFoundException::new);
+        var product = productRepository.findById(productId).orElseThrow(ProductNotFoundException::new);
 
         cart.addItem(product);
         cartRepository.save(cart);
 
-        return cartMapper.toDto(cart);
+        return cart;
     }
 
     public void deleteCart(UUID cartId) {
-        var cart = validateAndGetCart(cartId);
-
+        var cart = cartRepository.findById(cartId).orElseThrow(CartNotFoundException::new);
         cart.clearCart();
+
         cartRepository.save(cart);
     }
 
     // Cart item api
-    public List<CartItemDto> getCartItems(UUID cartId) {
-        var cart = validateAndGetCart(cartId);
-
-        return cartMapper.toItemsDto(cart.getItems());
+    public List<CartItem> getCartItems(UUID cartId) {
+        var cart = cartRepository.findById(cartId).orElseThrow(CartNotFoundException::new);
+        return cart.getItems();
     }
 
-    public CartItemDto updateCartItem(UUID cartId, Long productId, Integer quantity) {
-        var cart = validateAndGetCart(cartId);
-        validateAndGetProduct(productId);
+    public CartItem updateCartItem(UUID cartId, Long productId, Integer quantity) {
+        var cart = cartRepository.findById(cartId).orElseThrow(CartNotFoundException::new);
+        productRepository.findById(productId).orElseThrow(ProductNotFoundException::new);
 
         var cartItem = cart.getItem(productId);
-
         if (cartItem == null) {
             throw new ProductNotFoundException();
         }
         cartItem.setQuantity(quantity);
         cartRepository.save(cart);
 
-        return cartMapper.toCartItemDto(cartItem);
+        return cartItem;
     }
 
-    public CartDto removeCartItem(UUID cartId, Long productId) {
-        var cart = validateAndGetCart(cartId);
+    public Cart removeCartItem(UUID cartId, Long productId) {
+        var cart = cartRepository.findById(cartId).orElseThrow(CartNotFoundException::new);
+
         cart.removeItem(productId);
-        cartRepository.save(cart);
-        return cartMapper.toDto(cart);
-    }
-
-    @NonNull
-    private Cart validateAndGetCart(UUID cartId) {
-        var cart = cartRepository.findById(cartId).orElse(null);
-        if (cart == null) {
-            throw new CartNotFoundException();
-        }
-
-        return cart;
-    }
-
-    @NotNull
-    private Product validateAndGetProduct(Long productId) {
-        var product = productRepository.findById(productId).orElse(null);
-        if (product == null) {
-            throw new InvalidProductIdException();
-        }
-        return product;
+        return cartRepository.save(cart);
     }
 }
