@@ -1,4 +1,4 @@
-package com.codewithmosh.store.exceptions;
+package com.codewithmosh.store.exceptions.cart;
 
 import lombok.experimental.StandardException;
 import org.springframework.http.HttpStatus;

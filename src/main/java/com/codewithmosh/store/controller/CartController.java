@@ -6,7 +6,7 @@ import com.codewithmosh.store.dtos.carts.CartItemDto;
 import com.codewithmosh.store.dtos.carts.CartItemRequest;
 import com.codewithmosh.store.dtos.carts.UpdateCartItemRequest;
 import com.codewithmosh.store.entities.Cart;
-import com.codewithmosh.store.exceptions.ProductNotFoundException;
+import com.codewithmosh.store.exceptions.product.ProductNotFoundException;
 import com.codewithmosh.store.mappers.CartMapper;
 import com.codewithmosh.store.services.CartService;
 import com.codewithmosh.store.utils.ResponseUtils;

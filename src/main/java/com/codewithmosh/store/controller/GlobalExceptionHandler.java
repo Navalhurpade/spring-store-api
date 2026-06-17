@@ -1,7 +1,11 @@
 package com.codewithmosh.store.controller;
 
 import com.codewithmosh.store.dtos.apiResponse.ApiResponse;
-import com.codewithmosh.store.exceptions.*;
+import com.codewithmosh.store.exceptions.auth.ResourceForbiddenException;
+import com.codewithmosh.store.exceptions.auth.UserNotFoundException;
+import com.codewithmosh.store.exceptions.cart.CartNotFoundException;
+import com.codewithmosh.store.exceptions.cart.EmptyCartException;
+import com.codewithmosh.store.exceptions.product.ProductNotFoundException;
 import com.codewithmosh.store.utils.ResponseUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,7 +17,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
-import java.util.Map;
 
 @AllArgsConstructor
 @ControllerAdvice

@@ -2,8 +2,8 @@ package com.codewithmosh.store.services;
 
 import com.codewithmosh.store.entities.Cart;
 import com.codewithmosh.store.entities.CartItem;
-import com.codewithmosh.store.exceptions.CartNotFoundException;
-import com.codewithmosh.store.exceptions.ProductNotFoundException;
+import com.codewithmosh.store.exceptions.cart.CartNotFoundException;
+import com.codewithmosh.store.exceptions.product.ProductNotFoundException;
 import com.codewithmosh.store.repositories.CartRepository;
 import com.codewithmosh.store.repositories.ProductRepository;
 import lombok.AllArgsConstructor;

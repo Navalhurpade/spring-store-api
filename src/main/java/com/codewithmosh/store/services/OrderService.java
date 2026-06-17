@@ -2,10 +2,10 @@ package com.codewithmosh.store.services;
 
 import com.codewithmosh.store.dtos.orders.UpdateOrderRequest;
 import com.codewithmosh.store.entities.Order;
-import com.codewithmosh.store.exceptions.CartNotFoundException;
-import com.codewithmosh.store.exceptions.EmptyCartException;
-import com.codewithmosh.store.exceptions.OrderNotFoundException;
-import com.codewithmosh.store.exceptions.ResourceForbiddenException;
+import com.codewithmosh.store.exceptions.cart.CartNotFoundException;
+import com.codewithmosh.store.exceptions.cart.EmptyCartException;
+import com.codewithmosh.store.exceptions.order.OrderNotFoundException;
+import com.codewithmosh.store.exceptions.auth.ResourceForbiddenException;
 import com.codewithmosh.store.repositories.CartRepository;
 import com.codewithmosh.store.repositories.OrderRepository;
 import lombok.AllArgsConstructor;

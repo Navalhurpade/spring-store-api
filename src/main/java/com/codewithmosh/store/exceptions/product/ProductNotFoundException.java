@@ -1,4 +1,4 @@
-package com.codewithmosh.store.exceptions;
+package com.codewithmosh.store.exceptions.product;
 
 import lombok.experimental.StandardException;
 
