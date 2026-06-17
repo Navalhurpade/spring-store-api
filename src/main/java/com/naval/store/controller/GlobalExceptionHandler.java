@@ -5,6 +5,7 @@ import com.naval.store.exceptions.auth.ResourceForbiddenException;
 import com.naval.store.exceptions.auth.UserNotFoundException;
 import com.naval.store.exceptions.cart.CartNotFoundException;
 import com.naval.store.exceptions.cart.EmptyCartException;
+import com.naval.store.exceptions.paymentGateway.PaymentGatewayException;
 import com.naval.store.exceptions.product.CategoryNotFoundException;
 import com.naval.store.exceptions.product.ProductNotFoundException;
 import com.naval.store.utils.ResponseUtils;
@@ -78,4 +79,9 @@ public class GlobalExceptionHandler {
         return responseUtils.badRequest("Invalid request body");
     }
 
+
+    @ExceptionHandler(PaymentGatewayException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnreadableError(PaymentGatewayException ex) {
+        return responseUtils.error("Payment gateway failed with error", HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    }
 }

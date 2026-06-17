@@ -8,6 +8,5 @@ public class StoreApplication {
 
     public static void main(String[] args) {
         var ctx = SpringApplication.run(StoreApplication.class, args);
-
     }
 }

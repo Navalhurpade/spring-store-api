@@ -5,12 +5,12 @@ import com.naval.store.exceptions.cart.CartNotFoundException;
 import com.naval.store.exceptions.cart.EmptyCartException;
 import com.naval.store.repositories.CartRepository;
 import com.naval.store.repositories.OrderRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class CheckoutService {
     private final CartRepository cartRepository;

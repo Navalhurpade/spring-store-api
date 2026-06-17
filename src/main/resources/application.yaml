@@ -13,10 +13,14 @@ spring:
     accessTokenExpiration: 300      # 5m
     refreshTokenExpiration: 648000  # 7d
 server:
-  ssl:
-    key-store: classpath:keystore.p12
-    key-store-type: PKCS12
-    key-alias: springboot
-    key-store-password: password
+#  ssl:
+#    key-store: classpath:keystore.p12
+#    key-store-type: PKCS12
+#    key-alias: springboot
+#    key-store-password: password
   error:
     include-message: always
+  website-url: https://localhost:8080
+razorpay:
+  api-key: ${RAZORPAY_API_KEY}
+  api-secret: ${RAZORPAY_API_SECRET}

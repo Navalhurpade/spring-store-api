@@ -1,0 +1,4 @@
+endpoints:
+  - name: spring-store-api
+    upstream:
+      url: 8080
