@@ -24,16 +24,6 @@ public class OrderService {
     private final AuthUserService userService;
     private final OrderRepository orderRepository;
 
-    public Order placeOrder(UUID cartId) {
-        var cart = cartRepository.findById(cartId).orElseThrow(CartNotFoundException::new);
-
-        if (cart.isEmpty()) throw new EmptyCartException();
-
-        var order = Order.createFromCart(cart, userService.getCurentUser());
-        orderRepository.save(order);
-        return order;
-    }
-
     public List<Order> getOrders() {
         var user = userService.getCurentUser();
         return orderRepository.getOrderByCustomer_Id(user.getId());
