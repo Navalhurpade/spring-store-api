@@ -25,7 +25,7 @@ public class AuthUserService implements UserDetailsService {
     /**
      * Should be only used in authenticated methods
      *
-     * @return com.codewithmosh.store.entities.User
+     * @return com.naval.store.entities.User
      */
     public User getCurentUser() {
         var ctx = SecurityContextHolder.getContext().getAuthentication();

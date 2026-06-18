@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: ${DATA_SOURCE}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+server:
+  website-url: https://localhost.dev

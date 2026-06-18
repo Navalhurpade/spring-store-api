@@ -2,16 +2,14 @@ kind: Application
 spring:
   application:
     name: store
-  datasource:
-    url: jdbc:mysql://localhost:3306/store_api?createDatabaseIfNotExist=true
-    username: root
-    password: root
   jpa:
     show-sql: true
   jwt:
     secret: ${SECRET}
     accessTokenExpiration: 300      # 5m
     refreshTokenExpiration: 648000  # 7d
+  profiles:
+    active: dev
 server:
 #  ssl:
 #    key-store: classpath:keystore.p12
@@ -20,7 +18,6 @@ server:
 #    key-store-password: password
   error:
     include-message: always
-  website-url: https://localhost:8080
 razorpay:
   api-key: ${RAZORPAY_API_KEY}
   api-secret: ${RAZORPAY_API_SECRET}
