@@ -72,6 +72,8 @@ public class RazorpayPaymentGateway implements PaymentGateway {
                 case "payment_link.paid" -> Optional.of(new PaymentResponse(payload.orderId(), PaymentStatus.PAID));
                 case "payment_link.cancelled" ->
                         Optional.of(new PaymentResponse(payload.orderId(), PaymentStatus.FAILED));
+                case "payment.failed" ->
+                        Optional.of(new PaymentResponse(payload.orderId(), PaymentStatus.FAILED));
                 default -> Optional.empty();
             };
         } catch (Exception e) {
