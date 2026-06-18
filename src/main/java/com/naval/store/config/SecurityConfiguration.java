@@ -57,10 +57,18 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)  // disables csrf protection
                 .authorizeHttpRequests(c -> c
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/checkout/webhook").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/products/**").hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.PUT, "/products/**").hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole(Role.ADMIN.name())
                         .requestMatchers("/admin/**").hasRole(Role.ADMIN.name())
                         .requestMatchers("/carts/**").permitAll()
                         .anyRequest().authenticated()
