@@ -1,7 +1,7 @@
 package com.naval.store.dtos.orders;
 
 import com.naval.store.dtos.users.UserDto;
-import com.naval.store.entities.OrderStatus;
+import com.naval.store.entities.PaymentStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -12,7 +12,7 @@ import java.util.List;
 public class OrderDto {
     private Long orderId;
     private UserDto customer;
-    private OrderStatus status;
+    private PaymentStatus status;
     private List<OrderItemDto> items;
     private BigDecimal totalPrice;
     private Date createdAt;

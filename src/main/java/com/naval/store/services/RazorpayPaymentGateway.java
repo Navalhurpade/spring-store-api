@@ -3,22 +3,25 @@ package com.naval.store.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.naval.store.dtos.paymentGateway.PaymentResponse;
 import com.naval.store.dtos.paymentGateway.integration.razorpay.CheckoutSession;
 import com.naval.store.dtos.paymentGateway.integration.razorpay.RazorpayPayload;
 import com.naval.store.dtos.paymentGateway.integration.razorpay.WebhookData;
 import com.naval.store.entities.Order;
-import com.naval.store.entities.OrderStatus;
-import com.naval.store.exceptions.order.OrderNotFoundException;
+import com.naval.store.entities.PaymentStatus;
 import com.naval.store.exceptions.paymentGateway.InvalidWebhookSignatureException;
+import com.naval.store.exceptions.paymentGateway.PaymentGatewayException;
 import com.naval.store.repositories.OrderRepository;
 import com.naval.store.utils.AppUtils;
 import com.razorpay.RazorpayClient;
-import com.razorpay.RazorpayException;
 import com.razorpay.Utils;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -41,38 +44,38 @@ public class RazorpayPaymentGateway implements PaymentGateway {
 
 
     @Override
-    public CheckoutSession createCheckoutSession(Order order) throws RazorpayException, JsonProcessingException {
-        var razorpay = new RazorpayClient(razorpayApiKey, razorpayApiSecret);
-        var payload = createPaymentLinkPayload(order);
-        String jsonString = objectMapper.writeValueAsString(payload);
+    public CheckoutSession createCheckoutSession(Order order) throws JsonProcessingException {
+        try {
+            var razorpay = new RazorpayClient(razorpayApiKey, razorpayApiSecret);
+            var payload = createPaymentLinkPayload(order);
+            String jsonString = objectMapper.writeValueAsString(payload);
 
-        var data = razorpay.paymentLink.create(new JSONObject(jsonString));
-        var checkoutUrl = data.get("short_url").toString();
+            var data = razorpay.paymentLink.create(new JSONObject(jsonString));
+            var checkoutUrl = data.get("short_url").toString();
 
-        return new CheckoutSession(checkoutUrl);
+            return new CheckoutSession(checkoutUrl);
+        } catch (Exception e) {
+            throw new PaymentGatewayException(e);
+        }
     }
 
-    public void handleWebhook(String jsonPayload, String signature) {
+    @Override
+    public Optional<PaymentResponse> parseWebhookRequest(Map<String, String> headers, String jsonPayload) throws
+            PaymentGatewayException {
+        var signature = headers.get("x-razorpay-signature");
         try {
             boolean isValid = Utils.verifyWebhookSignature(jsonPayload, signature, webhookSignature);
             if (!isValid) throw new InvalidWebhookSignatureException();
-
             var payload = extractDataFromPayload(jsonPayload);
-            var order = orderRepository.findById(payload.orderId()).orElseThrow(OrderNotFoundException::new);
 
-            switch (payload.event()) {
-                case "payment_link.paid": {
-                    order.setStatus(OrderStatus.PAID);
-                    break;
-                }
-                case "payment_link.cancelled": {
-                    order.setStatus(OrderStatus.FAILED);
-                    break;
-                }
-            }
-            orderRepository.save(order);
+            return switch (payload.event()) {
+                case "payment_link.paid" -> Optional.of(new PaymentResponse(payload.orderId(), PaymentStatus.PAID));
+                case "payment_link.cancelled" ->
+                        Optional.of(new PaymentResponse(payload.orderId(), PaymentStatus.FAILED));
+                default -> Optional.empty();
+            };
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new PaymentGatewayException("Failed to parse the webhook request");
         }
     }
 

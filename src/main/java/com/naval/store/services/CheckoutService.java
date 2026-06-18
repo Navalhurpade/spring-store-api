@@ -1,8 +1,10 @@
 package com.naval.store.services;
 
+import com.naval.store.dtos.paymentGateway.PaymentResponse;
 import com.naval.store.entities.Order;
 import com.naval.store.exceptions.cart.CartNotFoundException;
 import com.naval.store.exceptions.cart.EmptyCartException;
+import com.naval.store.exceptions.order.OrderNotFoundException;
 import com.naval.store.repositories.CartRepository;
 import com.naval.store.repositories.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,5 +27,11 @@ public class CheckoutService {
         var order = Order.createFromCart(cart, userService.getCurentUser());
         orderRepository.save(order);
         return order;
+    }
+
+    public void handleWebhook(PaymentResponse paymentResponse) {
+        var order = orderRepository.findById(paymentResponse.getOrderId()).orElseThrow(OrderNotFoundException::new);
+        order.setStatus(paymentResponse.getPaymentStatus());
+        orderRepository.save(order);
     }
 }

@@ -1,9 +1,9 @@
 package com.naval.store.dtos.orders;
 
-import com.naval.store.entities.OrderStatus;
+import com.naval.store.entities.PaymentStatus;
 import lombok.Data;
 
 @Data
 public class UpdateOrderRequest {
-    private OrderStatus status;
+    private PaymentStatus status;
 }
